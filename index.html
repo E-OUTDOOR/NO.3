@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-OUTDOOR NO.03</title>
+    <title>Sistem SPPD</title>
     <meta name="description" content="Aplikasi administrasi SPPD, Surat Tugas, arsip perjalanan dinas, dan master pegawai yang cepat dan ringan.">
     
     <!-- Tailwind CSS CDN -->
@@ -1111,6 +1111,8 @@
                 lastSyncAt: '',
                 saveTimer: null,
                 refreshTimer: null,
+                syncInFlight: false,
+                pendingLocalChanges: false,
                 async saveApiUrl() {
                     this.apiUrl = (this.apiUrl || '').trim();
                     this.apiReady = /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:[?#].*)?$/.test(this.apiUrl);
@@ -1128,7 +1130,8 @@
                     }
                 },
                 async loadFromGoogleSheets(showError = false) {
-                    if (!this.apiReady) return false;
+                    if (!this.apiReady || this.syncInFlight || this.saveTimer) return false;
+                    if (!showError && this.isUserEditing && this.isUserEditing()) return false;
                     try {
                         const separator = this.apiUrl.includes('?') ? '&' : '?';
                         const response = await fetch(this.apiUrl + separator + 'action=getData&_=' + Date.now(), { method: 'GET', cache: 'no-store' });
@@ -1185,15 +1188,25 @@
                     localStorage.setItem('sppd_documents', JSON.stringify(this.dbDocumentList));
                 },
                 queueGoogleSheetsSave() {
+                    // Data lokal selalu diamankan terlebih dahulu, termasuk saat offline.
+                    this.cacheLocalData();
+                    this.pendingLocalChanges = true;
                     if (!this.apiReady) {
                         this.syncStatus = 'Lokal saja — URL belum dihubungkan';
                         return;
                     }
                     clearTimeout(this.saveTimer);
-                    this.saveTimer = setTimeout(() => { this.saveTimer = null; this.saveToGoogleSheets(); }, 700);
+                    this.saveTimer = setTimeout(() => { this.saveTimer = null; this.saveToGoogleSheets(); }, 250);
                 },
                 async saveToGoogleSheets() {
                     if (!this.apiReady) return false;
+                    if (this.syncInFlight) {
+                        clearTimeout(this.saveTimer);
+                        this.saveTimer = setTimeout(() => { this.saveTimer = null; this.saveToGoogleSheets(); }, 500);
+                        return false;
+                    }
+                    this.syncInFlight = true;
+                    this.cacheLocalData();
                     // Jangan pernah kirim PIN/kode akses ke Google Sheets.
                     const settingsForCloud = { ...this.settings };
                     delete settingsForCloud.accessCode;
@@ -1228,19 +1241,34 @@
                         if (!result || result.success !== true) throw new Error((result && result.error) || 'Server tidak mengonfirmasi penyimpanan');
                         this.syncStatus = 'Tersinkron';
                         this.lastSyncAt = new Date().toLocaleString('id-ID');
+                        this.pendingLocalChanges = false;
                         this.cacheLocalData();
                         return true;
                     } catch (error) {
                         console.error('Gagal menyimpan ke Google Sheets:', error);
-                        this.syncStatus = 'Gagal';
+                        this.syncStatus = 'Gagal — data lokal tetap aman';
                         return false;
+                    } finally {
+                        this.syncInFlight = false;
                     }
+                },
+                isUserEditing() {
+                    const el = document.activeElement;
+                    const typing = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT');
+                    // Jangan tarik data baru saat pengguna sedang berada di formulir,
+                    // agar isian yang belum disimpan tidak tertimpa dari perangkat lain.
+                    return !!typing || this.activeTab === 'form' || this.activeTab === 'settings' ||
+                        this.showEmployeeModal || this.showLoginModal;
                 },
                 startAutoRefresh() {
                     if (this.refreshTimer) clearInterval(this.refreshTimer);
+                    // Sinkronisasi dua arah berkala setiap 30 detik tanpa reload halaman.
                     this.refreshTimer = setInterval(() => {
-                        if (this.apiReady && !this.saveTimer && this.syncStatus !== 'Menyimpan…') this.loadFromGoogleSheets();
-                    }, 10000);
+                        if (!this.apiReady || !navigator.onLine || this.saveTimer || this.syncInFlight || this.isUserEditing()) return;
+                        // Kirim perubahan lokal yang tertunda lebih dahulu setelah internet pulih.
+                        if (this.pendingLocalChanges) this.saveToGoogleSheets();
+                        else this.loadFromGoogleSheets();
+                    }, 30000);
                 },
                 activeTab: 'dashboard',
                 showEmployeeModal: false,
@@ -1325,7 +1353,7 @@
                     }
 
                     const connected = await this.loadFromGoogleSheets();
-                    if (connected) this.startAutoRefresh();
+                    if (this.apiReady) this.startAutoRefresh();
                     this.resetFormToNew();
                 },
 
