@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem SPPD</title>
+    <title>OUTDOOR</title>
     <meta name="description" content="Aplikasi administrasi SPPD, Surat Tugas, arsip perjalanan dinas, dan master pegawai yang cepat dan ringan.">
     
     <!-- Tailwind CSS CDN -->
@@ -30,7 +30,8 @@
             .print-page.st-extra-top { padding-top: 0 !important; margin-top: -3em !important; }
             html, body { background-color: #ffffff !important; margin: 0 !important; padding: 0 !important; color: #000000 !important; font-size: 11pt; overflow: visible !important; }
             .no-print, header, nav, button, .ui-control, footer { display: none !important; }
-            .print-container { display: block !important; padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; box-shadow: none !important; }
+            .print-container, .print-container.hidden { display: block !important; visibility: visible !important; padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; box-shadow: none !important; }
+            .print-container * { visibility: visible !important; }
             .print-page { box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; border: none !important; border-radius: 0 !important; page-break-after: always !important; break-after: page !important; box-sizing: border-box; display: block !important; }
             .print-page:last-child { page-break-after: avoid !important; break-after: avoid !important; }
             table { page-break-inside: avoid; width: 100% !important; }
@@ -295,13 +296,22 @@
                                 <i class="fa-solid fa-user-check text-blue-600"></i> Pegawai Utama <span class="text-rose-500">*</span>
                             </h3>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Pegawai</label>
-                                <select x-model="surat.pegawaiUtamaIndex" class="w-full px-3 py-2 text-xs bg-white">
-                                    <template x-for="(emp, idx) in employees" :key="idx">
-                                        <option :value="idx" :disabled="isEmployeeSelected(idx, 'utama')" x-text="emp.nama + ' (' + emp.jabatan + ')' + (isEmployeeActiveOnDate(idx, surat.tglBerangkatRaw, surat.tglKembaliRaw, surat.id) ? ' (Sedang Aktif Dinas)' : isEmployeeSelected(idx, 'utama') ? ' (Sudah Dipilih)' : '')"></option>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Pegawai Utama</label>
+                                <input type="search" x-model="employeeSearchMain" placeholder="Ketik nama, misalnya: Mus..." class="w-full px-3 py-2 text-xs mb-1" autocomplete="off">
+                                <div x-show="employeeSearchMain.trim().length > 0" class="w-full bg-white border border-blue-200 rounded-lg shadow-sm max-h-52 overflow-y-auto" x-cloak>
+                                    <template x-for="item in filteredEmployees(employeeSearchMain, 'utama')" :key="item.index">
+                                        <button type="button" @click="selectMainEmployee(item.index)" :disabled="isEmployeeSelected(item.index, 'utama')" class="w-full text-left px-3 py-2.5 border-b border-slate-100 last:border-0 hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                                            <span class="block text-xs font-semibold text-slate-800" x-text="item.emp.nama"></span>
+                                            <span class="block text-[10px] text-slate-500" x-text="item.emp.jabatan + (isEmployeeActiveOnDate(item.index, surat.tglBerangkatRaw, surat.tglKembaliRaw, surat.id) ? ' • Sedang Aktif Dinas' : isEmployeeSelected(item.index, 'utama') ? ' • Sudah Dipilih' : '')"></span>
+                                        </button>
                                     </template>
-                                    <option value="" x-show="employees.length === 0">-- Belum Ada Data Pegawai --</option>
-                                </select>
+                                    <p x-show="filteredEmployees(employeeSearchMain, 'utama').length === 0" class="px-3 py-3 text-xs text-slate-500">Nama pegawai tidak ditemukan.</p>
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-1"></p>
+                                <div x-show="surat.pegawaiUtamaIndex !== '' && employees[surat.pegawaiUtamaIndex]" class="mt-2 flex items-center justify-between gap-2 rounded-lg bg-blue-50 border border-blue-100 px-3 py-2">
+                                    <span class="text-xs font-semibold text-blue-800" x-text="employees[surat.pegawaiUtamaIndex]?.nama"></span>
+                                    <button type="button" @click="surat.pegawaiUtamaIndex = ''; employeeSearchMain = ''" class="text-[10px] text-rose-600 font-semibold"></button>
+                                </div>
                             </div>
                             <div class="p-3 bg-white rounded-lg border border-slate-200 text-xs space-y-1 shadow-sm">
                                 <p class="break-words"><span class="font-semibold text-slate-600">Nama:</span> <span x-text="pegawaiUtama.nama"></span></p>
@@ -324,12 +334,22 @@
                                 <template x-for="(pengikutIdx, idx) in surat.pengikut" :key="idx">
                                     <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
                                         <span class="text-xs font-bold text-slate-500 w-5 text-center" x-text="idx + 1"></span>
-                                        <select x-model="surat.pengikut[idx]" class="flex-grow px-2 py-1.5 text-xs bg-white min-w-0">
-                                            <option value="">-- Pilih Pegawai Pengikut --</option>
-                                            <template x-for="(emp, eIdx) in employees" :key="eIdx">
-                                                <option :value="eIdx" :disabled="isEmployeeSelected(eIdx, 'pengikut', idx)" x-text="emp.nama + ' - ' + emp.jabatan + (isEmployeeActiveOnDate(eIdx, surat.tglBerangkatRaw, surat.tglKembaliRaw, surat.id) ? ' (Sedang Aktif Dinas)' : isEmployeeSelected(eIdx, 'pengikut', idx) ? ' (Sudah Dipilih)' : '')"></option>
-                                            </template>
-                                        </select>
+                                        <div class="flex-grow min-w-0">
+                                            <input type="search" x-model="employeeSearchFollowers[idx]" placeholder="Ketik nama pengikut..." class="w-full px-2 py-1.5 text-xs mb-1" autocomplete="off">
+                                            <div x-show="(employeeSearchFollowers[idx] || '').trim().length > 0" class="w-full bg-white border border-blue-200 rounded-lg shadow-sm max-h-44 overflow-y-auto" x-cloak>
+                                                <template x-for="item in filteredEmployees(employeeSearchFollowers[idx] || '', 'pengikut', idx)" :key="item.index">
+                                                    <button type="button" @click="selectFollower(idx, item.index)" :disabled="isEmployeeSelected(item.index, 'pengikut', idx)" class="w-full text-left px-2.5 py-2 border-b border-slate-100 last:border-0 hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                                                        <span class="block text-xs font-semibold text-slate-800" x-text="item.emp.nama"></span>
+                                                        <span class="block text-[10px] text-slate-500" x-text="item.emp.jabatan + (isEmployeeActiveOnDate(item.index, surat.tglBerangkatRaw, surat.tglKembaliRaw, surat.id) ? ' • Sedang Aktif Dinas' : isEmployeeSelected(item.index, 'pengikut', idx) ? ' • Sudah Dipilih' : '')"></span>
+                                                    </button>
+                                                </template>
+                                                <p x-show="filteredEmployees(employeeSearchFollowers[idx] || '', 'pengikut', idx).length === 0" class="px-2.5 py-2 text-xs text-slate-500">Nama pegawai tidak ditemukan.</p>
+                                            </div>
+                                            <div x-show="surat.pengikut[idx] !== '' && employees[surat.pengikut[idx]]" class="flex items-center justify-between gap-2 rounded bg-blue-50 px-2 py-1.5 mt-1">
+                                                <span class="text-[11px] font-semibold text-blue-800" x-text="employees[surat.pengikut[idx]]?.nama"></span>
+                                                <button type="button" @click="surat.pengikut[idx] = ''; employeeSearchFollowers[idx] = ''" class="text-[10px] text-rose-600 font-semibold"></button>
+                                            </div>
+                                        </div>
                                         <button @click="removePengikut(idx)" type="button" class="text-rose-600 hover:text-rose-800 p-1.5 text-xs shrink-0">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
@@ -347,11 +367,12 @@
                             </h3>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Dasar Perintah / Poin <span class="text-rose-500">*</span></label>
-                                <textarea rows="3" x-model.lazy="surat.dasarPoin2" placeholder="Masukkan Dasar Poin..." class="w-full px-3 py-2 text-xs"></textarea>
+                                <textarea rows="3" x-model="surat.dasarPoin2" @input="syncMaksudFromDasar()" placeholder="Masukkan Dasar Poin..." class="w-full px-3 py-2 text-xs"></textarea>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Maksud Perjalanan Dinas <span class="text-rose-500">*</span></label>
-                                <textarea rows="2" x-model.lazy="surat.maksud" class="w-full px-3 py-2 text-xs"></textarea>
+                                <textarea rows="2" x-model="surat.maksud" @input="maksudEdited = true" class="w-full px-3 py-2 text-xs"></textarea>
+                                <p class="text-[10px] text-slate-500"></p>
                             </div>
                         </div>
 
@@ -446,7 +467,7 @@
                                     <td class="px-4 py-3 text-slate-600 max-w-xs truncate" x-text="docItem.maksud"></td>
                                     <td class="px-4 py-3 text-slate-600" x-text="docItem.tglBerangkat"></td>
                                     <td class="px-4 py-3 text-center space-x-1 whitespace-nowrap">
-                                        <button @click="printSpecificDoc(docItem.id)" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 p-1.5 rounded text-xs font-semibold transition" title="Cetak">
+                                        <button type="button" @click="printSpecificDoc(docItem.id)" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 p-1.5 rounded text-xs font-semibold transition" title="Cetak">
                                             <i class="fa-solid fa-print"></i>
                                         </button>
                                         <button @click="loadDocForEdit(docItem.id)" class="bg-blue-50 text-blue-700 hover:bg-blue-100 p-1.5 rounded text-xs font-semibold transition" title="Edit">
@@ -1302,6 +1323,9 @@
 
                 employees: [],
                 dbDocumentList: [],
+                employeeSearchMain: '',
+                employeeSearchFollowers: {},
+                maksudEdited: false,
 
                 surat: {
                     id: null,
@@ -1410,6 +1434,30 @@
                     this.isLoggedIn = false;
                     localStorage.removeItem('sppd_session');
                     this.activeTab = 'dashboard';
+                },
+
+                filteredEmployees(query = '', context = 'utama', currentIndex = null) {
+                    const q = String(query || '').trim().toLocaleLowerCase('id-ID');
+                    return this.employees
+                        .map((emp, index) => ({ emp, index }))
+                        .filter(item => !q || String(item.emp.nama || '').toLocaleLowerCase('id-ID').includes(q))
+                        .slice(0, 30);
+                },
+
+                selectMainEmployee(index) {
+                    if (this.isEmployeeSelected(index, 'utama')) return;
+                    this.surat.pegawaiUtamaIndex = index;
+                    this.employeeSearchMain = '';
+                },
+
+                selectFollower(followerIndex, employeeIndex) {
+                    if (this.isEmployeeSelected(employeeIndex, 'pengikut', followerIndex)) return;
+                    this.surat.pengikut[followerIndex] = employeeIndex;
+                    this.employeeSearchFollowers[followerIndex] = '';
+                },
+
+                syncMaksudFromDasar() {
+                    if (!this.maksudEdited) this.surat.maksud = this.surat.dasarPoin2 || '';
                 },
 
                 get pegawaiUtama() {
@@ -1591,7 +1639,7 @@ formatTanggalIndonesia(value) {
                     const end = new Date(this.surat.tglKembaliRaw);
 
                     if (end < start) {
-                        alert('Peringatan: Tanggal Kembali harus lebih besar atau sama dengan Tanggal Berangkat!');
+                        alert('Tanggal Kembali harus lebih besar atau sama dengan Tanggal Berangkat!');
                         this.surat.tglKembaliRaw = this.surat.tglBerangkatRaw;
                     }
 
@@ -1618,6 +1666,9 @@ formatTanggalIndonesia(value) {
                 },
 
                 resetFormToNew() {
+                    this.maksudEdited = false;
+                    this.employeeSearchMain = '';
+                    this.employeeSearchFollowers = {};
                     const todayRaw = new Date().toISOString().split('T')[0];
                     const todayFormatted = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
                     
@@ -1741,7 +1792,7 @@ formatTanggalIndonesia(value) {
                     }
 
                     if (tglKembali < tglBerangkat) {
-                        alert('Peringatan: Tanggal Kembali harus lebih besar atau sama dengan Tanggal Berangkat!');
+                        alert('Tanggal Kembali harus lebih besar atau sama dengan Tanggal Berangkat!');
                         return;
                     }
 
@@ -1800,16 +1851,38 @@ formatTanggalIndonesia(value) {
                     const docItem = this.dbDocumentList.find(d => d.id === id);
                     if (docItem) {
                         this.surat = JSON.parse(JSON.stringify(docItem));
+                        this.maksudEdited = !!String(this.surat.maksud || '').trim();
+                        this.employeeSearchMain = '';
+                        this.employeeSearchFollowers = {};
                         this.checkNumberUniqueness();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 },
 
-                printSpecificDoc(id) {
-                    const docItem = this.dbDocumentList.find(d => d.id === id);
-                    if (docItem) {
-                        this.surat = JSON.parse(JSON.stringify(docItem));
-                        setTimeout(() => window.print(), 50);
+                async printSpecificDoc(id) {
+                    const docItem = this.dbDocumentList.find(d => String(d.id) === String(id));
+                    if (!docItem) {
+                        alert('Dokumen tidak ditemukan. Silakan muat ulang daftar arsip.');
+                        return;
+                    }
+
+                    // Muat dokumen yang dipilih ke area cetak, lalu tunggu Alpine
+                    // menyelesaikan pembaruan tampilan sebelum dialog cetak dibuka.
+                    this.surat = JSON.parse(JSON.stringify(docItem));
+                    this.maksudEdited = !!String(this.surat.maksud || '').trim();
+                    this.employeeSearchMain = '';
+                    this.employeeSearchFollowers = {};
+
+                    try {
+                        if (window.Alpine && typeof window.Alpine.nextTick === 'function') {
+                            await window.Alpine.nextTick();
+                        }
+                        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                        window.focus();
+                        window.print();
+                    } catch (error) {
+                        console.error('Gagal membuka cetak:', error);
+                        alert('Dialog cetak tidak dapat dibuka. Coba gunakan Ctrl + P pada keyboard.');
                     }
                 },
 
