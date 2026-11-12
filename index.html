@@ -137,6 +137,89 @@
     .fixed.inset-0 input { touch-action: manipulation; }
     button { -webkit-tap-highlight-color: transparent; }
 </style>
+
+<style id="payment-module-polish">
+    /* Penyempurnaan visual modul pembayaran; teks dan fungsi form tetap. */
+    #payment-module { color: #172033; }
+    #payment-module .payment-form-card, #payment-module > .bg-white {
+        border-color: #e5eaf0; border-radius: 18px;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, .045);
+    }
+    /* Compact two-column form: independent stacks prevent large empty grid cells. */
+    #payment-module .payment-document-field { margin-bottom: 12px; }
+    #payment-module .payment-fields-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; align-items: start; }
+    #payment-module .payment-fields-column { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    #payment-module .payment-note-field { margin-top: 12px; }
+    #payment-module .grid > div > label {
+        display: block; color: #344256; font-size: 13px; font-weight: 650;
+        line-height: 1.35; margin-bottom: 8px;
+    }
+    #payment-module input:not([type="checkbox"]), #payment-module select {
+        box-sizing: border-box; width: 100%; min-height: 42px;
+        padding: 9px 12px; border: 1px solid #d8e0e9; border-radius: 11px;
+        background-color: #fff; color: #172033; font-size: 14px;
+        outline: none; transition: border-color .16s ease, box-shadow .16s ease;
+    }
+    #payment-module input:focus, #payment-module select:focus {
+        border-color: #10a37f; box-shadow: 0 0 0 3px rgba(16, 163, 127, .12);
+    }
+    #payment-module .rounded-lg.border.border-slate-200 {
+        min-height: 0; padding: 12px; border-color: #e0e7ef;
+        border-radius: 14px; background: #fbfcfe;
+    }
+    #payment-module .rounded-lg.border.border-slate-200 > label {
+        font-size: 14px; margin-bottom: 12px; color: #263449;
+    }
+    #payment-module .rounded-lg.border.border-slate-200 .grid { gap: 8px; }
+    #payment-module .rounded-lg.border.border-slate-200 .grid label {
+        display: block; font-size: 11px; color: #64748b; margin-bottom: 6px;
+    }
+    #payment-module .rounded-lg.border.border-slate-200 p {
+        font-size: 12px; font-weight: 700; margin-top: 7px;
+    }
+    #payment-module .payment-total {
+        border-color: #dce9e5; background: linear-gradient(110deg, #f0fdf8, #f8fafc);
+    }
+    #payment-module .payment-total p.text-xl { font-size: 24px; letter-spacing: -.03em; }
+    #payment-module .payment-total button { min-height: 42px; border-radius: 10px; padding: 10px 18px; }
+    #payment-module .payment-total button:last-child { box-shadow: 0 3px 8px rgba(5, 150, 105, .16); }
+    #payment-module table { border-collapse: separate; border-spacing: 0; }
+    #payment-module thead th { white-space: nowrap; font-weight: 650; }
+    #payment-module tbody tr:hover { background: #f8fafc; }
+    @media (max-width: 639px) {
+        #payment-module .payment-fields-grid { grid-template-columns: minmax(0,1fr); gap: 10px; }
+        #payment-module .payment-fields-column { gap: 10px; }
+        #payment-module { padding-left: 0; padding-right: 0; }
+        #payment-module .payment-form-card { padding: 17px 15px; border-radius: 15px; }
+        #payment-module .grid { row-gap: 10px; }
+        #payment-module .payment-total { padding: 16px; }
+        #payment-module .payment-total > div:last-child { display: grid; grid-template-columns: 1fr 1.5fr; }
+        #payment-module .payment-total button { padding-left: 10px; padding-right: 10px; font-size: 11px; }
+    }
+</style>
+
+
+<style id="dashboard-payment-security-spacing-fix">
+    /* Jarak khusus antara kartu menu Pembayaran dan kartu status Keamanan/Kunci. */
+    .dashboard-content {
+        justify-content: flex-start !important;
+        gap: 30px !important;
+        min-height: 0 !important;
+    }
+    .dashboard-content > div:last-child {
+        margin-top: 0 !important;
+        flex-shrink: 0;
+    }
+    @media (max-width: 700px) {
+        .dashboard-content {
+            gap: 30px !important;
+        }
+        .dashboard-content > div:last-child {
+            margin-top: 0 !important;
+        }
+    }
+</style>
+
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col overflow-x-hidden w-full" x-data="sppdApp()" x-init="initApp()">
 
@@ -166,7 +249,10 @@
                     <i class="fa-solid fa-sliders"></i> Pengaturan
                 </button>
                 <button @click="navigateTo('form')" :class="activeTab === 'form' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5 whitespace-nowrap">
-                    <i class="fa-solid fa-pen-to-square"></i> Modul SPPD
+                    <i class="fa-solid fa-pen-to-square"></i>SPPD
+                </button>
+                <button @click="navigateTo('payments')" :class="activeTab === 'payments' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-money-bill-transfer"></i> Pembayaran
                 </button>
                 <button x-show="isLoggedIn" @click="logout()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-600/80 hover:bg-rose-600 text-white transition flex items-center gap-1.5 whitespace-nowrap ml-1" title="Keluar">
                     <i class="fa-solid fa-right-from-bracket"></i> Keluar
@@ -193,13 +279,17 @@
                     </div>
 
                     <div class="dashboard-actions">
-                        <button @click="navigateTo('form')" class="dashboard-card dashboard-card-primary">
-                            <span class="dashboard-icon"><i class="fa-solid fa-pen-to-square"></i></span>
-                            <span class="dashboard-title">Modul SPPD</span>
-                        </button>
-                        <button @click="navigateTo('settings')" class="dashboard-card dashboard-card-secondary">
+                        <button @click="navigateTo('settings')" class="dashboard-card dashboard-card-primary">
                             <span class="dashboard-icon"><i class="fa-solid fa-sliders"></i></span>
                             <span class="dashboard-title">Pengaturan</span>
+                        </button>
+                        <button @click="navigateTo('form')" class="dashboard-card dashboard-card-secondary">
+                            <span class="dashboard-icon"><i class="fa-solid fa-pen-to-square"></i></span>
+                            <span class="dashboard-title">SPPD</span>
+                        </button>
+                        <button @click="navigateTo('payments')" class="dashboard-card dashboard-card-secondary">
+                            <span class="dashboard-icon"><i class="fa-solid fa-money-bill-transfer"></i></span>
+                            <span class="dashboard-title">Pembayaran</span>
                         </button>
                     </div>
                 </div>
@@ -227,6 +317,134 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <section id="payment-module" x-show="activeTab === 'payments'" class="no-print space-y-4 max-w-7xl mx-auto px-1 sm:px-2" x-cloak>
+            <div class="payment-form-card bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 lg:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-money-bill-transfer text-emerald-600"></i>Pembayaran</h2>
+                        <p class="text-xs text-slate-500 mt-1"></p>
+                    </div>
+                    <span class="text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 px-3 py-1">Bendahara Pengeluaran</span>
+                </div>
+                <div class="payment-document-field">
+<div class="sm:col-span-2">
+<label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Dokumen SPPD</label>
+<select @change="fillPaymentFromDocument()" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white" x-model="paymentForm.documentId">
+<option value="">-- Pilih nomor ST / SPPD --</option>
+<template :key="doc.id" x-for="doc in dbDocumentList"><option :value="String(doc.id)" x-text="(doc.nomorSPPD || doc.nomorST || 'Tanpa nomor') + ' — ' + (doc.maksud || doc.tempatTujuan || '')"></option></template>
+</select>
+</div>
+                </div>
+                <div class="payment-fields-grid">
+                    <div class="payment-fields-column">
+<div>
+<label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Pegawai Penerima (Utama / Pengikut)</label>
+<select @change="selectPaymentRecipient()" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white" x-model="paymentForm.recipientKey">
+<option value="">-- Pilih pegawai dari dokumen SPPD --</option>
+<template :key="person.key" x-for="person in paymentRecipients()"><option :value="person.key" :disabled="person.saved" x-text="person.label"></option></template>
+</select>
+<p class="text-[11px] text-slate-500 mt-1"></p>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Pembayaran</label>
+<input class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm" type="date" x-model="paymentForm.paymentDate"/>
+</div>
+<div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-3 sm:p-4 space-y-3">
+<div class="flex items-center gap-2 border-b border-emerald-100 pb-2">
+<i class="fa-solid fa-route text-emerald-700"></i>
+<label class="text-sm font-bold text-slate-800">Biaya Transportasi</label>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<div>
+<label class="block text-xs font-semibold text-slate-700 mb-1">Tiket (Rp)</label>
+<input class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm" min="0" placeholder="0" step="1" type="number" x-model.number="paymentForm.ticket"/>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-700 mb-1">Lokal (Rp)</label>
+<input class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm" min="0" placeholder="0" step="1" type="number" x-model.number="paymentForm.localTransport"/>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-700 mb-1">Kegiatan (Rp)</label>
+<input class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm" min="0" placeholder="0" step="1" type="number" x-model.number="paymentForm.activityTransport"/>
+</div>
+</div>
+<div class="flex items-center justify-start gap-1 border-t border-emerald-100 pt-2">
+<span class="text-sm font-bold text-emerald-700" x-text="formatRupiah(Number(paymentForm.ticket || 0) + Number(paymentForm.localTransport || 0) + Number(paymentForm.activityTransport || 0))"></span>
+</div>
+</div>
+<div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-3 sm:p-4 space-y-3 payment-daily-card">
+<div class="flex items-center gap-2 border-b border-emerald-100 pb-2">
+<i class="fa-solid fa-calendar-day text-emerald-700"></i>
+<label class="text-sm font-bold text-slate-800">Uang Harian</label>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div><label class="block text-[11px] text-slate-500 mb-1">Tarif per hari (Rp)</label><input class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" min="0" placeholder="0" step="1" type="number" x-model.number="paymentForm.dailyRate"/></div>
+<div><label class="block text-[11px] text-slate-500 mb-1">Jumlah hari</label><input class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" min="0" placeholder="0" step="1" type="number" x-model.number="paymentForm.dailyDays"/></div>
+</div>
+<p class="text-xs font-semibold text-emerald-700 mt-2" x-text="formatRupiah(Number(paymentForm.dailyRate||0) * Number(paymentForm.dailyDays||0))"></p>
+</div>
+
+
+                    </div>
+                    <div class="payment-fields-column">
+<div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-3 sm:p-4 space-y-3 payment-lodging-card">
+<div class="flex items-center gap-2 border-b border-emerald-100 pb-2">
+<i class="fa-solid fa-hotel text-emerald-700"></i>
+<label class="text-sm font-bold text-slate-800">Uang Penginapan</label>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div><label class="block text-[11px] text-slate-500 mb-1">Tarif per hari (Rp)</label><input class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" min="0" placeholder="0" step="1" type="number" x-model.number="paymentForm.lodgingRate"/></div>
+<div><label class="block text-[11px] text-slate-500 mb-1">Jumlah hari</label><input class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" min="0" placeholder="0" step="1" type="number" x-model.number="paymentForm.lodgingDays"/></div>
+</div>
+<p class="text-xs font-semibold text-emerald-700 mt-2" x-text="formatRupiah(Number(paymentForm.lodgingRate||0) * Number(paymentForm.lodgingDays||0))"></p>
+</div>
+<div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-3 sm:p-4 space-y-3 payment-official-extra-card">
+<div class="flex items-center gap-2 border-b border-emerald-100 pb-2">
+<i class="fa-solid fa-user-tie text-emerald-700"></i>
+<label class="text-sm font-bold text-slate-800">Uang Tambahan Pejabat</label>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div>
+<label class="block text-[11px] text-slate-500 mb-1">Tarif per hari (Rp)</label>
+<input class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" min="0" placeholder="0" step="1" type="number" x-model.number="paymentForm.officialExtraRate"/>
+</div>
+<div>
+<label class="block text-[11px] text-slate-500 mb-1">Jumlah hari</label>
+<input class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" min="0" placeholder="0" step="1" type="number" x-model.number="paymentForm.officialExtraDays"/>
+</div>
+</div>
+<p class="text-xs font-semibold text-emerald-700 mt-2" x-text="formatRupiah(Number(paymentForm.officialExtraRate||0) * Number(paymentForm.officialExtraDays||0))"></p>
+</div>
+<div class="payment-status-field">
+<label class="block text-xs font-semibold text-slate-700 mb-1">Status Pembayaran</label>
+<select class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white" x-model="paymentForm.status" required :aria-invalid="!paymentForm.status">
+<option value="">Pilih</option><option value="Belum Dibayar">Belum Dibayar</option><option value="Sudah Dibayar">Sudah Dibayar</option>
+</select>
+</div>
+
+                    </div>
+                </div>
+                <div class="payment-note-field">
+<div class="sm:col-span-2">
+<label class="block text-xs font-semibold text-slate-700 mb-1">Bank Papua</label>
+<input class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm" placeholder="Nomor rekening / Nama pemilik" type="text" x-model="paymentForm.bankPapuaReg" :required="paymentForm.status === 'Belum Dibayar'" :aria-invalid="paymentForm.status === 'Belum Dibayar' && !String(paymentForm.bankPapuaReg || '').trim()"/>
+</div>
+<div class="sm:col-span-2">
+<label class="block text-xs font-semibold text-slate-700 mb-1">Keterangan</label>
+<input class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm" placeholder="Nomor bukti / keterangan tambahan (opsional)" type="text" x-model="paymentForm.note"/>
+</div>
+                </div>
+                <div class="payment-total mt-4 rounded-2xl bg-slate-50 border border-slate-200 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div><p class="text-xs text-slate-500">Total Pembayaran</p><p class="text-xl font-extrabold text-emerald-700" x-text="formatRupiah(Number(paymentForm.ticket || 0) + Number(paymentForm.localTransport || 0) + Number(paymentForm.activityTransport || 0) + (Number(paymentForm.dailyRate||0)*Number(paymentForm.dailyDays||0)) + (Number(paymentForm.lodgingRate||0)*Number(paymentForm.lodgingDays||0)) + (Number(paymentForm.officialExtraRate||0)*Number(paymentForm.officialExtraDays||0)))"></p></div>
+                    <div class="flex gap-2"><button type="button" @click="resetPaymentForm()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-semibold">Bersihkan</button><button type="button" @click="savePayment()" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"><i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Pembayaran</button></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 lg:p-7">
+                <div class="flex items-center justify-between gap-3 mb-5"><h3 class="font-bold text-slate-900">Riwayat Pembayaran</h3><span class="text-xs text-slate-500" x-text="payments.length + ' catatan' "></span></div>
+                <div class="overflow-x-auto"><table class="min-w-full text-xs text-left"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">No.</th><th class="p-3">Nomor SPPD</th><th class="p-3">Pegawai</th><th class="p-3">Total</th><th class="p-3">Tanggal</th><th class="p-3">Status</th><th class="p-3">Aksi</th></tr></thead><tbody class="divide-y divide-slate-100"><template x-for="(pay, idx) in payments" :key="pay.id"><tr><td class="p-3" x-text="idx + 1"></td><td class="p-3 font-mono" x-text="pay.nomorSPPD || '-' "></td><td class="p-3 font-semibold" x-text="pay.employeeName"></td><td class="p-3 font-bold" x-text="formatRupiah(Number(pay.ticket||0)+Number(pay.localTransport||0)+Number(pay.activityTransport||0)+Number(pay.dailyAllowance||0)+Number(pay.lodging||0)+Number(pay.officialExtra||0))"></td><td class="p-3" x-text="pay.paymentDate || '-' "></td><td class="p-3"><span class="px-2 py-1 rounded-full" :class="pay.status === 'Sudah Dibayar' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'" x-text="pay.status"></span></td><td class="p-3 whitespace-nowrap"><button @click="printPaymentReceipt(pay)" class="text-emerald-700 font-semibold mr-2"><i class="fa-solid fa-print"></i> Kwitansi</button><button @click="editPayment(pay)" class="text-blue-600 font-semibold mr-2">Edit</button><button @click="deletePayment(pay.id)" class="text-rose-600 font-semibold">Hapus</button></td></tr></template><tr x-show="payments.length === 0"><td colspan="7" class="p-6 text-center text-slate-400">Belum ada catatan pembayaran.</td></tr></tbody></table></div>
             </div>
         </section>
 
@@ -593,6 +811,27 @@
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Jabatan Resmi</label>
                             <input type="text" x-model.lazy="instansi.kadisJabatan" class="w-full px-3 py-2 text-xs">
                         </div>
+                    </div>
+                    <div class="mt-6 space-y-4 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+                        <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider border-b border-emerald-100 pb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-file-signature text-emerald-600"></i>Bendahara Pengeluaran
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1"></label>
+                                <select x-model="instansi.bendaharaMasterIndex" @change="onSelectBendaharaMaster()" class="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg">
+                                    <option value="">-- Pilih pegawai --</option>
+                                    <template x-for="(emp, idx) in employees" :key="'bendahara-' + idx">
+                                        <option :value="String(idx)" x-text="emp.nama + ' (NIP. ' + (emp.nip || '-') + ')' "></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">Nama Bendahara</label><input type="text" x-model.lazy="instansi.bendaharaNama" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg" placeholder="Nama bendahara pengeluaran"></div>
+                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">NIP Bendahara</label><input type="text" x-model.lazy="instansi.bendaharaNip" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg" placeholder="NIP bendahara pengeluaran"></div>
+                        </div>
+                        <p class="text-[11px] text-slate-500"></p>
                     </div>
                 </div>
             </div>
@@ -1159,8 +1398,12 @@
                         if (!response.ok) throw new Error('HTTP ' + response.status);
                         const data = await response.json();
                         if (!data || data.error) throw new Error(data && data.error ? data.error : 'Format respons tidak valid');
-                        if (Array.isArray(data.employees)) this.employees = data.employees.map(emp => ({ ...emp, nip: nipAsText(emp && emp.nip) }));
+                        if (Array.isArray(data.employees)) { this.employees = data.employees.map(emp => ({ ...emp, nip: nipAsText(emp && emp.nip) })); if (this.instansi.bendaharaMasterIndex !== '') this.onSelectBendaharaMaster(); }
                         if (Array.isArray(data.documents)) this.dbDocumentList = data.documents;
+                        if (Array.isArray(data.payments)) {
+                            this.payments = data.payments;
+                            if (this.normalizePaymentReceiptNumbers()) this.queueGoogleSheetsSave();
+                        }
                         if (data.settings && typeof data.settings === 'object') {
                             // PIN hanya dikelola oleh HTML/browser ini; abaikan accessCode dari Google Sheets.
                             const localAccessCode = this.settings.accessCode;
@@ -1207,6 +1450,7 @@
                     localStorage.setItem('sppd_instansi', JSON.stringify(this.instansi));
                     localStorage.setItem('sppd_employees', JSON.stringify(this.employees));
                     localStorage.setItem('sppd_documents', JSON.stringify(this.dbDocumentList));
+                    localStorage.setItem('sppd_payments', JSON.stringify(this.payments));
                 },
                 queueGoogleSheetsSave() {
                     // Data lokal selalu diamankan terlebih dahulu, termasuk saat offline.
@@ -1244,6 +1488,7 @@
                         type: 'saveAll',
                         employees: this.employees,
                         documents: this.dbDocumentList,
+                        payments: this.payments,
                         settings: settingsForCloud,
                         instansi: instansiForCloud
                     };
@@ -1318,11 +1563,16 @@
                     kadisNama: '',
                     kadisJabatan: '',
                     kadisNip: '',
+                    bendaharaMasterIndex: '',
+                    bendaharaNama: '',
+                    bendaharaNip: '',
                     kotaDikeluarkan: 'Ullong'
                 },
 
                 employees: [],
                 dbDocumentList: [],
+                payments: [],
+                paymentForm: { id: null, documentId: '', employeeName: '', recipientKey: 'main', recipientType: 'Pegawai Utama', paymentDate: new Date().toISOString().slice(0,10), ticket: 0, localTransport: 0, activityTransport: 0, dailyRate: 0, dailyDays: 0, dailyAllowance: 0, lodgingRate: 0, lodgingDays: 0, lodging: 0, officialExtra: 0, officialExtraRate: 0, officialExtraDays: 0, status: '', bankPapuaReg: '', note: '' },
                 employeeSearchMain: '',
                 employeeSearchFollowers: {},
                 maksudEdited: false,
@@ -1369,14 +1619,18 @@
                         const savedInstansi = JSON.parse(cachedInstansi);
                         this.instansi = { ...this.instansi, ...savedInstansi, kadisNip: nipAsText(savedInstansi.kadisNip) };
                     }
-                    if (cachedEmp) this.employees = JSON.parse(cachedEmp).map(emp => ({ ...emp, nip: nipAsText(emp && emp.nip) }));
+                    if (cachedEmp) { this.employees = JSON.parse(cachedEmp).map(emp => ({ ...emp, nip: nipAsText(emp && emp.nip) })); if (this.instansi.bendaharaMasterIndex !== '') this.onSelectBendaharaMaster(); }
                     if (cachedDocs) this.dbDocumentList = JSON.parse(cachedDocs);
+                    const cachedPayments = localStorage.getItem('sppd_payments');
+                    if (cachedPayments) this.payments = JSON.parse(cachedPayments);
                     
                     if (localStorage.getItem('sppd_session') === 'active') {
                         this.isLoggedIn = true;
                     }
 
                     const connected = await this.loadFromGoogleSheets();
+                    if (this.normalizePaymentReceiptNumbers()) this.queueGoogleSheetsSave();
+                    else this.cacheLocalData();
                     if (this.apiReady) this.startAutoRefresh();
                     this.resetFormToNew();
                 },
@@ -1531,6 +1785,15 @@
                         // Simpan pilihan pejabat dan NIP agar tidak hilang saat sinkronisasi berikutnya.
                         this.saveSettingsToDB();
                     }
+                },
+                onSelectBendaharaMaster() {
+                    const idx = this.instansi.bendaharaMasterIndex;
+                    const emp = idx !== '' ? this.employees[Number(idx)] : null;
+                    if (!emp) return;
+                    // Nama dan NIP langsung ditampilkan saat pilihan pegawai berubah.
+                    // Penyimpanan dilakukan bersama tombol Simpan Pengaturan.
+                    this.instansi.bendaharaNama = emp.nama || '';
+                    this.instansi.bendaharaNip = nipAsText(emp.nip);
                 },
 
                 generateAutoNumbers() {
@@ -1699,7 +1962,11 @@ formatTanggalIndonesia(value) {
                 },
 
                 saveSettingsToDB() {
+                    // Pastikan pilihan Bendahara dari Master Pegawai ikut diterapkan
+                    // sebelum seluruh pengaturan disimpan.
+                    if (this.instansi.bendaharaMasterIndex !== '') this.onSelectBendaharaMaster();
                     this.instansi.kadisNip = nipAsText(this.instansi.kadisNip);
+                    this.instansi.bendaharaNip = nipAsText(this.instansi.bendaharaNip);
                     if (!this.instansi.kadisNip && this.instansi.kadisMasterIndex !== '') {
                         const selectedKadis = this.employees[Number(this.instansi.kadisMasterIndex)];
                         this.instansi.kadisNip = nipAsText(selectedKadis && selectedKadis.nip);
@@ -1895,9 +2162,262 @@ formatTanggalIndonesia(value) {
                     }
                 },
 
+                formatRupiah(value) {
+                    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value) || 0);
+                },
+                paymentRecipients() {
+                    const doc = this.dbDocumentList.find(d => String(d.id) === String(this.paymentForm.documentId));
+                    if (!doc) return [];
+                    const people = [];
+                    const main = this.employees[Number(doc.pegawaiUtamaIndex)];
+                    if (main) people.push({ key: 'main', name: main.nama, label: 'Pegawai Utama — ' + main.nama });
+                    (Array.isArray(doc.pengikut) ? doc.pengikut : []).forEach((empIndex, idx) => {
+                        const emp = this.employees[Number(empIndex)];
+                        if (emp) people.push({ key: 'follower:' + idx, name: emp.nama, label: 'Pengikut ' + (idx + 1) + ' — ' + emp.nama });
+                    });
+                    // Di modul PEMBAYARAN, penerima yang sudah memiliki catatan pembayaran
+                    // pada dokumen SPPD yang sama tidak boleh dipilih ulang.
+                    // Saat mengedit catatan, catatan yang sedang diedit dikecualikan.
+                    return people.map(person => {
+                        const alreadySaved = (this.payments || []).some(pay => {
+                            if (String(pay.documentId) !== String(doc.id)) return false;
+                            if (this.paymentForm.id && String(pay.id) === String(this.paymentForm.id)) return false;
+                            const sameRecipientKey = pay.recipientKey && String(pay.recipientKey) === String(person.key);
+                            const sameLegacyName = !pay.recipientKey &&
+                                String(pay.employeeName || '').trim().toLowerCase() === String(person.name || '').trim().toLowerCase();
+                            return sameRecipientKey || sameLegacyName;
+                        });
+                        return {
+                            ...person,
+                            saved: alreadySaved,
+                            label: person.label + (alreadySaved ? ' — SUDAH DISIMPAN' : '')
+                        };
+                    });
+                },
+                selectPaymentRecipient() {
+                    const person = this.paymentRecipients().find(p => p.key === this.paymentForm.recipientKey);
+                    if (person) {
+                        this.paymentForm.employeeName = person.name;
+                        this.paymentForm.recipientType = person.key === 'main' ? 'Pegawai Utama' : 'Pengikut';
+                    }
+                },
+                fillPaymentFromDocument() {
+                    const doc = this.dbDocumentList.find(d => String(d.id) === String(this.paymentForm.documentId));
+                    if (!doc) return;
+                    this.paymentForm.nomorSPPD = doc.nomorSPPD || '';
+                    // Jangan otomatis memilih penerima yang sudah tersimpan pada pembayaran dokumen ini.
+                    this.paymentForm.employeeName = '';
+                    this.paymentForm.recipientKey = '';
+                    this.paymentForm.recipientType = '';
+                    const availableRecipient = this.paymentRecipients().find(person => !person.saved);
+                    if (availableRecipient) {
+                        this.paymentForm.employeeName = availableRecipient.name || '';
+                        this.paymentForm.recipientKey = availableRecipient.key;
+                        this.paymentForm.recipientType = availableRecipient.key === 'main' ? 'Pegawai Utama' : 'Pengikut';
+                    }
+                },
+                resetPaymentForm() {
+                    this.paymentForm = { id: null, documentId: '', employeeName: '', recipientKey: 'main', recipientType: 'Pegawai Utama', paymentDate: new Date().toISOString().slice(0,10), ticket: 0, localTransport: 0, activityTransport: 0, dailyRate: 0, dailyDays: 0, dailyAllowance: 0, lodgingRate: 0, lodgingDays: 0, lodging: 0, officialExtra: 0, officialExtraRate: 0, officialExtraDays: 0, status: '', bankPapuaReg: '', note: '' };
+                },
+                normalizePaymentReceiptNumbers() {
+                    const kept = new Set(), used = new Set(); let changed = false;
+                    for (const pay of (this.payments || [])) {
+                        const id = String(pay && pay.id || '');
+                        const valid = (pay.status === 'Belum Dibayar' ? /^LS-\\d{7}$/ : /^PAY-\\d{3}$/).test(id);
+                        if (valid && !used.has(id)) { used.add(id); kept.add(pay); } else changed = true;
+                    }
+                    for (const pay of (this.payments || [])) {
+                        if (kept.has(pay)) continue;
+                        const unpaid = pay.status === 'Belum Dibayar';
+                        const prefix = unpaid ? 'LS-' : 'PAY-';
+                        let n = 1; const maxN = unpaid ? 9999999 : 999; const digits = unpaid ? 7 : 3;
+                        while (n <= maxN && used.has(prefix + String(n).padStart(digits, '0'))) n++;
+                        if (n > maxN) continue;
+                        const newId = prefix + String(n).padStart(digits, '0');
+                        pay.id = newId; used.add(newId); kept.add(pay); changed = true;
+                    }
+                    return changed;
+                },
+                nextPaymentReceiptId() {
+                    const used = new Set((this.payments || []).map(pay => String(pay && pay.id || '')));
+                    for (let number = 1; number <= 999; number++) {
+                        const candidate = 'PAY-' + String(number).padStart(3, '0');
+                        if (!used.has(candidate)) return candidate;
+                    }
+                    return null;
+                },
+                nextPaymentRequestId() {
+                    const used = new Set((this.payments || []).map(pay => String(pay && pay.id || '')));
+                    for (let number = 1; number <= 9999999; number++) {
+                        const candidate = 'LS-' + String(number).padStart(7, '0');
+                        if (!used.has(candidate)) return candidate;
+                    }
+                    return null;
+                },
+                async savePayment() {
+                    // Validasi wajib sebelum data lokal maupun Google Sheets diubah.
+                    const paymentStatus = String(this.paymentForm.status || '').trim();
+                    if (!['Belum Dibayar', 'Sudah Dibayar'].includes(paymentStatus)) {
+                        alert('Pilih status');
+                        return;
+                    }
+                    if (paymentStatus === 'Belum Dibayar' && !String(this.paymentForm.bankPapuaReg || '').trim()) {
+                        alert('kolom Bank Papua wajib diisi');
+                        return;
+                    }
+                    this.paymentForm.status = paymentStatus;
+                    if (!this.paymentForm.documentId) { alert('Pilih dokumen SPPD terlebih dahulu.'); return; }
+                    const doc = this.dbDocumentList.find(d => String(d.id) === String(this.paymentForm.documentId));
+                    if (!doc) { alert('Dokumen SPPD tidak ditemukan.'); return; }
+                    // Nama penerima diambil otomatis dari pilihan pegawai di atas.
+                    const selectedPerson = this.paymentRecipients().find(p => p.key === this.paymentForm.recipientKey);
+                    if (selectedPerson) this.paymentForm.employeeName = selectedPerson.name;
+                    if (!String(this.paymentForm.employeeName || '').trim() || !String(this.paymentForm.recipientKey || '').trim()) { alert('Pilih pegawai penerima terlebih dahulu.'); return; }
+                    const duplicateRecipient = (this.payments || []).some(pay =>
+                        String(pay.documentId) === String(this.paymentForm.documentId) &&
+                        String(pay.recipientKey || '') === String(this.paymentForm.recipientKey) &&
+                        (!this.paymentForm.id || String(pay.id) !== String(this.paymentForm.id))
+                    );
+                    if (duplicateRecipient) {
+                        alert('Pegawai ini sudah memiliki catatan pembayaran pada dokumen SPPD tersebut dan tidak dapat disimpan dua kali.');
+                        return;
+                    }
+                    const dailyRate = Math.max(0, Number(this.paymentForm.dailyRate)||0);
+                    const dailyDays = Math.max(0, Number(this.paymentForm.dailyDays)||0);
+                    const lodgingRate = Math.max(0, Number(this.paymentForm.lodgingRate)||0);
+                    const lodgingDays = Math.max(0, Number(this.paymentForm.lodgingDays)||0);
+                    const recipientEmployee = this.employees.find(emp => String(emp.nama || '').trim() === String(this.paymentForm.employeeName || '').trim());
+                    const record = { ...this.paymentForm, employeeName: String(this.paymentForm.employeeName).trim(), recipientNip: nipAsText(recipientEmployee && recipientEmployee.nip), nomorSPPD: doc.nomorSPPD || doc.nomorST || '', nomorST: doc.nomorST || '', payer: 'Bendahara Pengeluaran', ticket: Math.max(0, Number(this.paymentForm.ticket)||0), localTransport: Math.max(0, Number(this.paymentForm.localTransport)||0), activityTransport: Math.max(0, Number(this.paymentForm.activityTransport)||0), dailyRate, dailyDays, dailyAllowance: dailyRate * dailyDays, lodgingRate, lodgingDays, lodging: lodgingRate * lodgingDays, officialExtraRate: Math.max(0, Number(this.paymentForm.officialExtraRate)||0), officialExtraDays: Math.max(0, Number(this.paymentForm.officialExtraDays)||0), officialExtra: Math.max(0, Number(this.paymentForm.officialExtraRate)||0) * Math.max(0, Number(this.paymentForm.officialExtraDays)||0), updatedAt: new Date().toISOString() };
+                    const isRequest = record.status === 'Belum Dibayar';
+                    const validId = isRequest ? /^LS-\\d{7}$/.test(String(record.id||'')) : /^PAY-\\d{3}$/.test(String(record.id||''));
+                    if (record.id) {
+                        const i = this.payments.findIndex(p => String(p.id) === String(record.id));
+                        if (i >= 0 && validId) this.payments.splice(i, 1, record);
+                        else {
+                            const newId = isRequest ? this.nextPaymentRequestId() : this.nextPaymentReceiptId();
+                            if (!newId) { alert(isRequest ? 'Nomor permohonan LS-0000001 sampai LS-9999999 sudah habis.' : 'Nomor kwitansi PAY-001 sampai PAY-999 sudah habis.'); return; }
+                            record.id = newId; record.createdAt = new Date().toISOString();
+                            if (i >= 0) this.payments.splice(i, 1, record); else this.payments.unshift(record);
+                        }
+                    } else {
+                        const newId = isRequest ? this.nextPaymentRequestId() : this.nextPaymentReceiptId();
+                        if (!newId) { alert(isRequest ? 'Nomor permohonan LS-0000001 sampai LS-9999999 sudah habis.' : 'Nomor kwitansi PAY-001 sampai PAY-999 sudah habis.'); return; }
+                        record.id = newId; record.createdAt = new Date().toISOString(); this.payments.unshift(record);
+                    }
+                    // Simpan cache lokal terlebih dahulu, lalu kirim langsung agar status
+                    // Belum Dibayar tidak hanya terlihat berhasil padahal belum masuk Sheets.
+                    this.queueGoogleSheetsSave();
+                    let cloudSaved = false;
+                    if (this.apiReady) {
+                        clearTimeout(this.saveTimer);
+                        this.saveTimer = null;
+                        cloudSaved = await this.saveToGoogleSheets();
+                    }
+                    this.resetPaymentForm();
+                    if (cloudSaved) {
+                        alert('Data pembayaran berhasil disimpan');
+                    } else if (this.apiReady) {
+                        alert('GAGAL menyimpan');
+                    } else {
+                        alert('Data pembayaran tersimpan di browser. Hubungkan URL Web App Google Sheets pada Pengaturan > Koneksi Google Sheets agar data masuk ke spreadsheet.');
+                    }
+                },
+                editPayment(pay) {
+                    this.paymentForm = { ticket: 0, localTransport: 0, activityTransport: 0, ...pay,
+                        dailyRate: pay.dailyRate ?? Number(pay.dailyAllowance || 0), dailyDays: pay.dailyDays ?? (Number(pay.dailyAllowance || 0) ? 1 : 0),
+                        lodgingRate: pay.lodgingRate ?? Number(pay.lodging || 0), lodgingDays: pay.lodgingDays ?? (Number(pay.lodging || 0) ? 1 : 0), officialExtraRate: pay.officialExtraRate ?? Number(pay.officialExtra || 0), officialExtraDays: pay.officialExtraDays ?? (Number(pay.officialExtra || 0) ? 1 : 0), officialExtra: Number(pay.officialExtra || 0)
+                    };
+                    this.activeTab = 'payments'; window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+                printPaymentReceipt(pay) {
+                    const esc = v => String(v ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
+                    const rupiah = v => this.formatRupiah(v);
+                    const total = Number(pay.ticket||0) + Number(pay.localTransport||0) + Number(pay.activityTransport||0) + Number(pay.dailyAllowance||0) + Number(pay.lodging||0) + Number(pay.officialExtra||0);
+                    const terbilang = n => {
+                        const angka = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
+                        n = Math.floor(Math.abs(Number(n)||0));
+                        const baca = x => {
+                            if (x < 12) return angka[x];
+                            if (x < 20) return baca(x-10) + ' belas';
+                            if (x < 100) return baca(Math.floor(x/10)) + ' puluh' + (x%10 ? ' ' + baca(x%10) : '');
+                            if (x < 200) return 'seratus' + (x>100 ? ' ' + baca(x-100) : '');
+                            if (x < 1000) return baca(Math.floor(x/100)) + ' ratus' + (x%100 ? ' ' + baca(x%100) : '');
+                            if (x < 2000) return 'seribu' + (x>1000 ? ' ' + baca(x-1000) : '');
+                            if (x < 1000000) return baca(Math.floor(x/1000)) + ' ribu' + (x%1000 ? ' ' + baca(x%1000) : '');
+                            if (x < 1000000000) return baca(Math.floor(x/1000000)) + ' juta' + (x%1000000 ? ' ' + baca(x%1000000) : '');
+                            if (x < 1000000000000) return baca(Math.floor(x/1000000000)) + ' miliar' + (x%1000000000 ? ' ' + baca(x%1000000000) : '');
+                            return String(x);
+                        };
+                        return (total === 0 ? 'nol' : baca(n)) + ' rupiah';
+                    };
+                    const isUnpaid = pay.status === 'Belum Dibayar';
+                    const dateValue = isUnpaid ? (pay.createdAt || new Date().toISOString().slice(0,10)) : pay.paymentDate;
+                    const dateText = dateValue ? new Date(String(dateValue).slice(0,10) + 'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) : '-';
+                    const inst = this.instansi || {};
+                    // Lokasi penandatanganan kwitansi ditetapkan sesuai permintaan: ULLONG.
+                    const city = 'ULLONG';
+                    const org = inst.namaDinas || '';
+                    const recipientEmployee = this.employees.find(emp => String(emp.nama || '').trim() === String(pay.employeeName || '').trim()) || {};
+                    const recipientNip = nipAsText(pay.recipientNip || recipientEmployee.nip);
+                    const bendaharaNama = inst.bendaharaNama || '';
+                    const bendaharaNip = nipAsText(inst.bendaharaNip);
+                    const metaExtraRows = isUnpaid ? `<tr><td>Nama penerima</td><td>: ${esc(pay.employeeName || '-')}</td></tr><tr><td>Bank Papua</td><td>: ${esc(pay.bankPapuaReg || '-')}</td></tr><tr><td>Tanggal pengajuan</td><td>: ${esc(dateText)}</td></tr>` : `<tr><td>Jenis penerima</td><td>: ${esc(pay.recipientType || 'Pegawai SPPD')}</td></tr><tr><td>Nama penerima</td><td>: ${esc(pay.employeeName || '-')}</td></tr><tr><td>Tanggal pembayaran</td><td>: ${esc(dateText)}</td></tr>`;
+                    const signRecipient = isUnpaid ? '' : `<tr><td colspan="2"><div class="sign-head">Yang menerima,</div><div class="space"></div><div class="sign-name">${esc(pay.employeeName || '........................................')}</div><div class="sign-nip">NIP. ${esc(recipientNip || '........................................')}</div></td></tr>`;
+                    const doc = this.dbDocumentList.find(d => String(d.id) === String(pay.documentId)) || {};
+                    // Cetak melalui iframe tersembunyi agar tidak membuka tab/jendela baru.
+                    const printFrame = document.createElement('iframe');
+                    printFrame.setAttribute('aria-hidden', 'true');
+                    printFrame.title = 'Area cetak kwitansi';
+                    printFrame.style.position = 'fixed';
+                    printFrame.style.right = '0';
+                    printFrame.style.bottom = '0';
+                    printFrame.style.width = '0';
+                    printFrame.style.height = '0';
+                    printFrame.style.border = '0';
+                    printFrame.style.visibility = 'hidden';
+                    document.body.appendChild(printFrame);
+                    const printDoc = printFrame.contentDocument || printFrame.contentWindow.document;
+                    printDoc.open();
+                    printDoc.write(`<!doctype html><html><head><meta charset="utf-8"><title>${isUnpaid ? 'Permohonan Pembayaran' : 'Kwitansi Pembayaran'}</title><style>
+                        @page{size:A4 portrait;margin:15mm}*{box-sizing:border-box}html,body{width:100%;margin:0;padding:0}body{font-family:Arial,sans-serif;color:#111;font-size:11px;line-height:1.35}.county{text-align:left;font-size:12px;font-weight:600;letter-spacing:.15px;margin:0 0 2px}h2{text-align:left;margin:0 0 4px;font-size:17px}h3{text-align:left;margin:0 0 18px;font-size:13px;font-weight:normal}.line{border-top:2px solid #111;margin:9px 0 17px}.meta{width:100%;table-layout:fixed;border-collapse:collapse;margin-bottom:14px}.meta td{padding:3px 4px;vertical-align:top;overflow-wrap:anywhere}.meta td:first-child{width:25%}.items{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;margin:12px 0}.items th,.items td{border:1px solid #333;padding:7px 6px;overflow-wrap:anywhere}.items th{text-align:center;background:#f1f1f1}.items th:nth-child(1){width:34%}.items th:nth-child(2){width:42%}.items th:nth-child(3){width:24%}.right{text-align:right}.transport-calc{white-space:normal;overflow-wrap:anywhere}.total{font-weight:bold;font-size:13px}.sign{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:42px;text-align:center}.sign-paid{margin-top:42px}.sign-unpaid{margin-top:42px}.sign-unpaid-block{width:50%;margin-left:auto;text-align:center}.sign-unpaid-block .sign-head{text-align:center}.sign-unpaid-block .sign-name{width:max-content;max-width:100%;margin:0 auto 4px;text-align:center}.sign-unpaid-block .sign-nip{text-align:center}.sign-paid .space{height:58px}.sign-paid .sign-head{height:34px}.sign-paid tr+tr td{padding-top:0}.sign td{width:50%;vertical-align:top;padding:0 12px;overflow-wrap:anywhere}.sign-head{height:34px;line-height:16px;display:block}.space{height:58px}.sign-name{display:table;width:auto;max-width:100%;min-height:14px;line-height:14px;font-weight:bold;border-bottom:1px solid #111;padding:0 2px 5px;margin:0 auto 4px;white-space:normal}.sign-unpaid .sign-name{margin:0 auto 4px}.sign-nip{min-height:13px;line-height:13px;font-size:10px}.small{font-size:10px}@media print{html,body{width:auto!important;overflow:visible!important}button{display:none!important}.sign{break-inside:avoid;page-break-inside:avoid}.items{break-inside:avoid;page-break-inside:avoid}}</style></head><body>
+                        <div class="county">PEMERINTAH KABUPATEN PEGUNUNGAN ARFAK</div><h2>${esc(org || 'DINAS PENANAMAN MODAL dan PTSP')}</h2><h3>${isUnpaid ? 'PERMOHONAN PEMBAYARAN PERJALANAN DINAS' : 'KWITANSI PEMBAYARAN PERJALANAN DINAS'}</h3><div class="line"></div>
+                        <table class="meta"><tr><td width="25%">${isUnpaid ? 'Nomor Permohonan' : 'Nomor Kwitansi'}</td><td>: ${esc(pay.id || '-')}</td></tr><tr><td>${isUnpaid ? 'Telah di verifikasi' : 'Telah diterima dari'}</td><td>: Bendahara Pengeluaran</td></tr><tr><td>Uang sejumlah</td><td>: <b>${esc(rupiah(total))}</b></td></tr><tr><td>Untuk pembayaran</td><td>: Biaya perjalanan dinas berdasarkan SPPD Nomor ${esc(pay.nomorSPPD || '-')}</td></tr>${metaExtraRows}</table>
+                        <table class="items"><thead><tr><th>Uraian</th><th>Perhitungan</th><th>Jumlah</th></tr></thead><tbody>
+                        <tr><td>Transportasi</td><td class="right transport-calc"><div>Tiket ${esc(rupiah(pay.ticket))} PP</div><div>Lokal ${esc(rupiah(pay.localTransport))} PP</div><div>Kegiatan ${esc(rupiah(pay.activityTransport))} PP</div></td><td class="right">${esc(rupiah(Number(pay.ticket||0)+Number(pay.localTransport||0)+Number(pay.activityTransport||0)))}</td></tr>
+                        <tr><td>Uang Harian</td><td class="right">${esc(rupiah(pay.dailyRate ?? pay.dailyAllowance))} × ${esc(pay.dailyDays ?? (pay.dailyAllowance ? 1 : 0))} hari</td><td class="right">${esc(rupiah(pay.dailyAllowance))}</td></tr>
+                        <tr><td>Uang Penginapan</td><td class="right">${esc(rupiah(pay.lodgingRate ?? pay.lodging))} × ${esc(pay.lodgingDays ?? (pay.lodging ? 1 : 0))} malam/hari</td><td class="right">${esc(rupiah(pay.lodging))}</td></tr>
+                        <tr><td>Uang Tambahan Pejabat</td><td class="right">${esc(rupiah(pay.officialExtraRate ?? pay.officialExtra ?? 0))} × ${esc(pay.officialExtraDays ?? (Number(pay.officialExtra||0) ? 1 : 0))} hari</td><td class="right">${esc(rupiah(pay.officialExtra ?? (Number(pay.officialExtraRate||0) * Number(pay.officialExtraDays||0))))}</td></tr>
+                        <tr><td colspan="2" class="right total">${isUnpaid ? 'JUMLAH DIMOHONKAN' : 'JUMLAH DIBAYARKAN'}</td><td class="right total">${esc(rupiah(total))}</td></tr></tbody></table>
+                        <p>Terbilang: <b>${esc(terbilang(total))}</b></p><p class="small">Keterangan: ${esc(pay.note || 'Pembayaran biaya perjalanan dinas.')}</p>
+                        <table class="sign ${isUnpaid ? "sign-unpaid" : "sign-paid"}">${isUnpaid ? `<tr><td colspan="2"><div class="sign-unpaid-block"><div class="sign-head">${esc(city)}, ${esc(dateText)}<br>Bendahara Pengeluaran</div><div class="space"></div><div class="sign-name">${esc(bendaharaNama || '(........................................)')}</div><div class="sign-nip">NIP. ${esc(bendaharaNip || '........................................')}</div></div></td></tr>` : `<tr><td><div class="sign-head">Bendahara Pengeluaran</div><div class="space"></div><div class="sign-name">${esc(bendaharaNama || '(........................................)')}</div><div class="sign-nip">NIP. ${esc(bendaharaNip || '........................................')}</div></td><td><div class="sign-head">${esc(city)}, ${esc(dateText)}<br>Yang menerima,</div><div class="space"></div><div class="sign-name">${esc(pay.employeeName || '........................................')}</div><div class="sign-nip">NIP. ${esc(recipientNip || '........................................')}</div></td></tr>`}</table>
+                        <script><\/script></body></html>`);
+                    printDoc.close();
+                    const cleanupPrintFrame = () => {
+                        if (printFrame && printFrame.parentNode) printFrame.parentNode.removeChild(printFrame);
+                    };
+                    const printWindow = printFrame.contentWindow;
+                    let cleaned = false;
+                    const cleanupOnce = () => { if (!cleaned) { cleaned = true; cleanupPrintFrame(); } };
+                    printWindow.addEventListener('afterprint', cleanupOnce, { once: true });
+                    // Beri waktu browser menyelesaikan layout sebelum dialog cetak dipanggil.
+                    setTimeout(() => {
+                        try {
+                            printWindow.focus();
+                            printWindow.print();
+                            // Fallback untuk browser Android yang tidak mengirim event afterprint.
+                            setTimeout(cleanupOnce, 30000);
+                        } catch (error) {
+                            console.error('Gagal mencetak kwitansi:', error);
+                            cleanupOnce();
+                            alert('Dialog cetak tidak dapat dibuka. Silakan coba kembali.');
+                        }
+                    }, 350);
+                },
+                deletePayment(id) { if (!confirm('Hapus catatan pembayaran ini?')) return; this.payments = this.payments.filter(p => p.id !== id); this.queueGoogleSheetsSave(); },
+
                 exportDatabaseJSON() {
                     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
-                        documents: this.dbDocumentList, employees: this.employees, settings: this.settings, instansi: this.instansi
+                        documents: this.dbDocumentList, payments: this.payments, employees: this.employees, settings: this.settings, instansi: this.instansi
                     }, null, 2));
                     const a = document.createElement('a');
                     a.href = dataStr;
@@ -1917,6 +2437,7 @@ formatTanggalIndonesia(value) {
                                 this.dbDocumentList = imported.documents;
                                 localStorage.setItem('sppd_documents', JSON.stringify(this.dbDocumentList));
                             }
+                            if (Array.isArray(imported.payments)) { this.payments = imported.payments; localStorage.setItem('sppd_payments', JSON.stringify(this.payments)); }
                             if (imported.employees) {
                                 this.employees = imported.employees;
                                 localStorage.setItem('sppd_employees', JSON.stringify(this.employees));
